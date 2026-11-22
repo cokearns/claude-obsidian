@@ -21,7 +21,7 @@ def copy_hook_config(plugin):
         shutil.copytree(manifest, plugin / manifest.name)
 
 
-def run_hook(root, vault, event, **settings):
+def run_hook(root, vault, event, *, cmd_fallback=False, **settings):
     manifest = root / ".codex-plugin/plugin.json"
     hook_file = "hooks/hooks.json"
     if manifest.is_file():
@@ -30,9 +30,13 @@ def run_hook(root, vault, event, **settings):
     handler = hooks[event][0]["hooks"][0]
     command = handler["command"]
     if os.name == "nt":
-        command = handler.get("commandWindows", command) + "\nexit $LASTEXITCODE"
-        encoded = base64.b64encode(command.encode("utf-16-le")).decode("ascii")
-        argv = ["powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded]
+        command = handler.get("commandWindows", command)
+        if cmd_fallback:
+            shell = subprocess.list2cmdline([os.environ["COMSPEC"], "/D", "/C"])
+            argv = f'{shell} "{command}"'
+        else:
+            encoded = base64.b64encode(command.encode("utf-16-le")).decode("ascii")
+            argv = ["powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded]
     else:
         argv = ["/bin/sh", "-c", command]
     env = {
@@ -69,6 +73,10 @@ class CodexHooksTests(unittest.TestCase):
                 run = run_hook(plugin, vault, event)
                 self.assertEqual(run.returncode, 0, run.stderr)
                 self.assertEqual(run.stdout.strip(), "isolated")
+                if os.name == "nt":
+                    fallback = run_hook(plugin, vault, event, cmd_fallback=True)
+                    self.assertNotEqual(fallback.returncode, 0, fallback.stdout)
+                    self.assertNotIn("isolated", fallback.stdout)
 
     def test_lifecycle_commands_resolve_a_plugin_path_with_spaces(self):
         """A dropped script argument must not make Python execute the event JSON."""

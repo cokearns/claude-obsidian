@@ -56,17 +56,19 @@ not convert the product repository into a user vault.
 
 ## Codex marketplace
 
-Use a Codex release that supports plugin lifecycle hooks. Install from the
-public marketplace:
+Use Codex CLI 0.171.0 or newer for the repo-root marketplace and the
+platform-specific hook commands. Install from this fork's public marketplace:
 
 ```sh
-codex plugin marketplace add AgriciDaniel/claude-obsidian
+codex plugin marketplace add cokearns/claude-obsidian
 codex plugin add claude-obsidian@agricidaniel-claude-obsidian
 ```
 
 Start Codex and review the Obsidian hooks in `/hooks`. Native Windows needs
-`python.exe` on `PATH`; macOS, Linux and WSL use `python3`. The hooks read
-vault context only when you opt in, and report recovery status when needed.
+PowerShell and `python.exe` on `PATH`. macOS, Linux and WSL use `python3`.
+To load vault context on session start, set `CLAUDE_OBSIDIAN_SESSION_CONTEXT=1`
+before opening Codex. See the [hook guide](../hooks/README.md) for vault
+selection rules. The Stop hook reports recovery status when needed.
 
 ## Portable Agent Skills hosts
 
