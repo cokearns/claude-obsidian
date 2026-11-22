@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact|fork",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${PLUGIN_ROOT}/scripts/claude-obsidian.py\" hook session-start",
+            "timeout": 5,
+            "commandWindows": "& { $python = Get-Command python.exe -CommandType Application -ErrorAction Stop; if ([IO.Path]::GetDirectoryName($python.Source) -eq (Get-Location).ProviderPath) { throw 'Python must be installed outside the hook working directory' }; & ($python.Source) -I -c \"import os, runpy, sys; sys.argv[0] = os.path.join(os.environ['PLUGIN_ROOT'], 'scripts', 'claude-obsidian.py'); runpy.run_path(sys.argv[0], run_name='__main__')\" hook session-start; exit $LASTEXITCODE }"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${PLUGIN_ROOT}/scripts/claude-obsidian.py\" hook stop",
+            "timeout": 5,
+            "commandWindows": "& { $python = Get-Command python.exe -CommandType Application -ErrorAction Stop; if ([IO.Path]::GetDirectoryName($python.Source) -eq (Get-Location).ProviderPath) { throw 'Python must be installed outside the hook working directory' }; & ($python.Source) -I -c \"import os, runpy, sys; sys.argv[0] = os.path.join(os.environ['PLUGIN_ROOT'], 'scripts', 'claude-obsidian.py'); runpy.run_path(sys.argv[0], run_name='__main__')\" hook stop; exit $LASTEXITCODE }"
+          }
+        ]
+      }
+    ]
+  }
+}
